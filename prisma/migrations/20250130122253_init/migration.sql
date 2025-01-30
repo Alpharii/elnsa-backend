@@ -1,30 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the `Account` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `FavoriteCharacter` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Hobby` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Person` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropForeignKey
-ALTER TABLE "FavoriteCharacter" DROP CONSTRAINT "FavoriteCharacter_personId_fkey";
-
--- DropForeignKey
-ALTER TABLE "Hobby" DROP CONSTRAINT "Hobby_personId_fkey";
-
--- DropTable
-DROP TABLE "Account";
-
--- DropTable
-DROP TABLE "FavoriteCharacter";
-
--- DropTable
-DROP TABLE "Hobby";
-
--- DropTable
-DROP TABLE "Person";
-
 -- CreateTable
 CREATE TABLE "accounts" (
     "id" SERIAL NOT NULL,
@@ -40,6 +13,8 @@ CREATE TABLE "persons" (
     "name" TEXT NOT NULL,
     "phone" TEXT NOT NULL,
     "email" TEXT NOT NULL,
+    "picture" TEXT NOT NULL,
+    "accountId" INTEGER NOT NULL,
 
     CONSTRAINT "persons_pkey" PRIMARY KEY ("id")
 );
@@ -65,6 +40,12 @@ CREATE TABLE "favorite_characters" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "accounts_username_key" ON "accounts"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "persons_accountId_key" ON "persons"("accountId");
+
+-- AddForeignKey
+ALTER TABLE "persons" ADD CONSTRAINT "persons_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "accounts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "hobbies" ADD CONSTRAINT "hobbies_personId_fkey" FOREIGN KEY ("personId") REFERENCES "persons"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

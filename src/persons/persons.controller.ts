@@ -8,11 +8,17 @@ import {
   Delete,
   UseGuards,
   Request,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { PersonsService } from './persons.service';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
 import { JwtAuthGuard } from 'src/auth/jwt.auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import * as fs from 'fs';
 
 @Controller('api/v1/persons')
 export class PersonsController {
@@ -20,9 +26,45 @@ export class PersonsController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Request() req: any, @Body() createPersonDto: CreatePersonDto) {
-    const accountId = req.user.id;
-    return this.personsService.createSelf(accountId, createPersonDto);
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './public',
+        filename: (req, file, cb) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          return cb(null, `person-${randomName}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  async create(
+    @Request() req: any,
+    @Body() createPersonDto: CreatePersonDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    try {
+      const accountId = req.user.id;
+      const imageUrl = file ? `/public/${file.filename}` : null;
+      const response = await this.personsService.createPerson(
+        accountId,
+        createPersonDto,
+        imageUrl,
+      );
+      return response;
+    } catch (error) {
+      if (file) {
+        try {
+          const filePath = `./public/${file.filename}`;
+          fs.unlinkSync(filePath);
+        } catch (fsError) {
+          console.log('Error while deleting file:', fsError);
+        }
+      }
+      throw error;
+    }
   }
 
   @Get()
@@ -37,9 +79,45 @@ export class PersonsController {
 
   @UseGuards(JwtAuthGuard)
   @Patch()
-  update(@Request() req: any, @Body() updatePersonDto: UpdatePersonDto) {
-    const accountId = req.user.id;
-    return this.personsService.updateSelf(accountId, updatePersonDto);
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './public',
+        filename: (req, file, cb) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          return cb(null, `person-${randomName}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  async update(
+    @Request() req: any,
+    @Body() updatePersonDto: UpdatePersonDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    try {
+      const accountId = req.user.id;
+      const imageUrl = file ? `/public/${file.filename}` : undefined;
+      const response = await this.personsService.updateSelf(
+        accountId,
+        updatePersonDto,
+        imageUrl,
+      );
+      return response;
+    } catch (error) {
+      if (file) {
+        try {
+          const filePath = `./public/${file.filename}`;
+          fs.unlinkSync(filePath);
+        } catch (fsError) {
+          console.log('Error while deleting file:', fsError);
+        }
+      }
+      throw error;
+    }
   }
 
   @UseGuards(JwtAuthGuard)

@@ -21,6 +21,7 @@ model Person {
   name                 String
   phone                String
   email                String
+  picture              String
   hobbies              Hobby[]
   favoriteCharacters   FavoriteCharacter[]
   accountId Int     @unique

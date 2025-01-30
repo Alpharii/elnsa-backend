@@ -1,4 +1,9 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -7,18 +12,26 @@ import { PrismaService } from 'src/prisma.service';
 export class PersonsService {
   constructor(private prisma: PrismaService) {}
 
-  async createSelf(accountId: number, createPersonDto: CreatePersonDto) {
+  async createPerson(
+    accountId: number,
+    createPersonDto: CreatePersonDto,
+    imageUrl?: string,
+  ) {
     const existingPerson = await this.prisma.person.findUnique({
       where: { accountId },
     });
 
     if (existingPerson) {
-      throw new ConflictException('User already has a person profile');
+      throw new HttpException(
+        'User already has a person profile',
+        HttpStatus.CONFLICT,
+      );
     }
 
     return this.prisma.person.create({
       data: {
         ...createPersonDto,
+        picture: imageUrl,
         account: {
           connect: { id: accountId },
         },
@@ -42,17 +55,28 @@ export class PersonsService {
     return person;
   }
 
-  async updateSelf(accountId: number, updatePersonDto: UpdatePersonDto) {
+  async updateSelf(
+    accountId: number,
+    updatePersonDto: UpdatePersonDto,
+    imageUrl?: string,
+  ) {
     const existingPerson = await this.prisma.person.findUnique({
       where: { accountId },
     });
 
     if (!existingPerson) {
-      throw new ConflictException('User does not have a person profile');
+      throw new HttpException(
+        'User does not have a person profile',
+        HttpStatus.CONFLICT,
+      );
     }
+
     return this.prisma.person.update({
       where: { accountId },
-      data: updatePersonDto,
+      data: {
+        ...updatePersonDto,
+        ...(imageUrl && { picture: imageUrl }),
+      },
     });
   }
 
