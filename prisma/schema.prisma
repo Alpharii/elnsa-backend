@@ -11,6 +11,9 @@ model Account {
   id       Int     @id @default(autoincrement())
   username String  @unique
   password String  // Password akan di-encrypt menggunakan AES di aplikasi
+  person   Person?
+
+  @@map("accounts")
 }
 
 model Person {
@@ -20,6 +23,10 @@ model Person {
   email                String
   hobbies              Hobby[]
   favoriteCharacters   FavoriteCharacter[]
+  accountId Int     @unique
+  account   Account @relation(fields: [accountId], references: [id])
+
+  @@map("persons")
 }
 
 model Hobby {
@@ -27,6 +34,8 @@ model Hobby {
   name     String
   person   Person  @relation(fields: [personId], references: [id])
   personId Int
+
+  @@map("hobbies")
 }
 
 model FavoriteCharacter {
@@ -35,4 +44,6 @@ model FavoriteCharacter {
   name     String
   person   Person  @relation(fields: [personId], references: [id])
   personId Int
+
+  @@map("favorite_characters")
 }
