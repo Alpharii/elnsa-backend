@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateFavoriteCharacterDto } from './dto/create-favorite-character.dto';
 import { UpdateFavoriteCharacterDto } from './dto/update-favorite-character.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -12,11 +8,11 @@ export class FavoriteCharacterService {
   constructor(private prisma: PrismaService) {}
 
   async create(
-    accountId: number,
+    personId: number,
     createFavoriteCharacterDto: CreateFavoriteCharacterDto,
   ) {
     const person = await this.prisma.person.findUnique({
-      where: { accountId },
+      where: { id: personId },
     });
     if (!person) throw new NotFoundException('Person not found');
 
@@ -34,14 +30,9 @@ export class FavoriteCharacterService {
     });
   }
 
-  async findMyFavoriteCharacters(accountId: number) {
-    const person = await this.prisma.person.findUnique({
-      where: { accountId },
-    });
-    if (!person) throw new NotFoundException('Person not found');
-
+  async findByPersonId(personId: number) {
     return this.prisma.favoriteCharacter.findMany({
-      where: { personId: person.id },
+      where: { personId },
       include: { person: true },
     });
   }
@@ -57,7 +48,6 @@ export class FavoriteCharacterService {
   }
 
   async update(
-    accountId: number,
     id: number,
     updateFavoriteCharacterDto: UpdateFavoriteCharacterDto,
   ) {
@@ -67,11 +57,6 @@ export class FavoriteCharacterService {
     });
     if (!favoriteCharacter)
       throw new NotFoundException('Favorite character not found');
-    if (favoriteCharacter.person.accountId !== accountId) {
-      throw new ForbiddenException(
-        'You can only update your own favorite characters',
-      );
-    }
 
     return this.prisma.favoriteCharacter.update({
       where: { id },
@@ -79,18 +64,13 @@ export class FavoriteCharacterService {
     });
   }
 
-  async remove(accountId: number, id: number) {
+  async remove(id: number) {
     const favoriteCharacter = await this.prisma.favoriteCharacter.findUnique({
       where: { id },
       include: { person: true },
     });
     if (!favoriteCharacter)
       throw new NotFoundException('Favorite character not found');
-    if (favoriteCharacter.person.accountId !== accountId) {
-      throw new ForbiddenException(
-        'You can only delete your own favorite characters',
-      );
-    }
     return this.prisma.favoriteCharacter.delete({ where: { id } });
   }
 }

@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateHobbyDto } from './dto/create-hobby.dto';
 import { UpdateHobbyDto } from './dto/update-hobby.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -11,14 +7,11 @@ import { PrismaService } from 'src/prisma.service';
 export class HobbyService {
   constructor(private prisma: PrismaService) {}
 
-  async create(id: number, createHobbyDto: CreateHobbyDto) {
-    const personId = await this.prisma.person.findUnique({
-      where: { accountId: id },
-    });
+  async create(personId: number, createHobbyDto: CreateHobbyDto) {
     return this.prisma.hobby.create({
       data: {
         ...createHobbyDto,
-        person: { connect: { id: personId.id } },
+        person: { connect: { id: personId } },
       },
     });
   }
@@ -36,40 +29,31 @@ export class HobbyService {
     return hobby;
   }
 
-  async FindMyHobbies(id: number) {
-    const personId = await this.prisma.person.findUnique({
-      where: { accountId: id },
-    });
+  async findByPersonId(personId: number) {
     return this.prisma.hobby.findMany({
-      where: { personId: personId.id },
+      where: { personId },
       include: { person: true },
     });
   }
 
-  async update(accountId: number, id: number, updateHobbyDto: UpdateHobbyDto) {
+  async update(id: number, updateHobbyDto: UpdateHobbyDto) {
     const hobby = await this.prisma.hobby.findUnique({
       where: { id },
       include: { person: true },
     });
     if (!hobby) throw new NotFoundException('Hobby not found');
-    if (hobby.person.accountId !== accountId) {
-      throw new ForbiddenException('You can only update your own hobbies');
-    }
     return this.prisma.hobby.update({
       where: { id },
       data: updateHobbyDto,
     });
   }
 
-  async remove(accountId: number, id: number) {
+  async remove(id: number) {
     const hobby = await this.prisma.hobby.findUnique({
       where: { id },
       include: { person: true },
     });
     if (!hobby) throw new NotFoundException('Hobby not found');
-    if (hobby.person.accountId !== accountId) {
-      throw new ForbiddenException('You can only delete your own hobbies');
-    }
     return this.prisma.hobby.delete({ where: { id } });
   }
 }

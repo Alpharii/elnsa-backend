@@ -7,7 +7,6 @@ import {
   Param,
   Delete,
   UseGuards,
-  Request,
 } from '@nestjs/common';
 import { HobbyService } from './hobby.service';
 import { CreateHobbyDto } from './dto/create-hobby.dto';
@@ -20,8 +19,8 @@ export class HobbyController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Request() req: any, @Body() createHobbyDto: CreateHobbyDto) {
-    return this.hobbyService.create(req.user.id, createHobbyDto);
+  create(@Body() createHobbyDto: CreateHobbyDto, personId: number) {
+    return this.hobbyService.create(personId, createHobbyDto);
   }
 
   @Get()
@@ -29,10 +28,9 @@ export class HobbyController {
     return this.hobbyService.findAll();
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('my-hobbies')
-  FindMyHobbies(@Request() req: any) {
-    return this.hobbyService.FindMyHobbies(req.user.id);
+  @Get('person/:id')
+  findByPersonId(@Param('id') personId: string) {
+    return this.hobbyService.findByPersonId(+personId);
   }
 
   @Get(':id')
@@ -42,17 +40,13 @@ export class HobbyController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(
-    @Request() req: any,
-    @Param('id') id: string,
-    @Body() updateHobbyDto: UpdateHobbyDto,
-  ) {
-    return this.hobbyService.update(req.user.id, +id, updateHobbyDto);
+  update(@Param('id') id: string, @Body() updateHobbyDto: UpdateHobbyDto) {
+    return this.hobbyService.update(+id, updateHobbyDto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Request() req: any, @Param('id') id: string) {
-    return this.hobbyService.remove(req.user.id, +id);
+  remove(@Param('id') id: string) {
+    return this.hobbyService.remove(+id);
   }
 }

@@ -46,10 +46,8 @@ export class PersonsController {
     @UploadedFile() file?: Express.Multer.File,
   ) {
     try {
-      const accountId = req.user.id;
       const imageUrl = file ? `/public/${file.filename}` : null;
       const response = await this.personsService.createPerson(
-        accountId,
         createPersonDto,
         imageUrl,
       );
@@ -78,7 +76,7 @@ export class PersonsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch()
+  @Patch(':id')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -94,15 +92,14 @@ export class PersonsController {
     }),
   )
   async update(
-    @Request() req: any,
+    @Param('id') id: string,
     @Body() updatePersonDto: UpdatePersonDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     try {
-      const accountId = req.user.id;
       const imageUrl = file ? `/public/${file.filename}` : undefined;
-      const response = await this.personsService.updateSelf(
-        accountId,
+      const response = await this.personsService.updatePerson(
+        +id,
         updatePersonDto,
         imageUrl,
       );
@@ -121,10 +118,8 @@ export class PersonsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete()
-  remove(@Request() req: any) {
-    const accountId = req.user.id;
-    console.log(accountId);
-    return this.personsService.removeSelf(accountId);
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.personsService.removePerson(+id);
   }
 }

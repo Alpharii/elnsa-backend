@@ -37,10 +37,9 @@ export class FavoriteCharacterController {
     return this.favoriteCharacterService.findAll();
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('my-favorite-characters')
-  findMyFavoriteCharacters(@Request() req: any) {
-    return this.favoriteCharacterService.findMyFavoriteCharacters(req.user.id);
+  @Get('person/:id')
+  findByPersonId(@Param('id') personId: string) {
+    return this.favoriteCharacterService.findByPersonId(+personId);
   }
 
   @Get(':id')
@@ -56,7 +55,6 @@ export class FavoriteCharacterController {
     @Body() updateFavoriteCharacterDto: UpdateFavoriteCharacterDto,
   ) {
     return this.favoriteCharacterService.update(
-      req.user.id,
       +id,
       updateFavoriteCharacterDto,
     );
@@ -65,6 +63,6 @@ export class FavoriteCharacterController {
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Request() req: any, @Param('id') id: string) {
-    return this.favoriteCharacterService.remove(req.user.id, +id);
+    return this.favoriteCharacterService.remove(+id);
   }
 }
