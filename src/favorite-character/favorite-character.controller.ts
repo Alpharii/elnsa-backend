@@ -10,7 +10,6 @@ import {
   Delete,
 } from '@nestjs/common';
 import { FavoriteCharacterService } from './favorite-character.service';
-import { CreateFavoriteCharacterDto } from './dto/create-favorite-character.dto';
 import { UpdateFavoriteCharacterDto } from './dto/update-favorite-character.dto';
 import { JwtAuthGuard } from 'src/auth/jwt.auth.guard';
 
@@ -23,12 +22,17 @@ export class FavoriteCharacterController {
   @UseGuards(JwtAuthGuard)
   @Post()
   create(
-    @Request() req: any,
-    @Body() createFavoriteCharacterDto: CreateFavoriteCharacterDto,
+    @Body()
+    body: {
+      personId: number;
+      name: string;
+      origin: string;
+    },
   ) {
     return this.favoriteCharacterService.create(
-      req.user.id,
-      createFavoriteCharacterDto,
+      body.personId,
+      body.name,
+      body.origin,
     );
   }
 

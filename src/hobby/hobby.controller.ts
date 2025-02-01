@@ -9,7 +9,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { HobbyService } from './hobby.service';
-import { CreateHobbyDto } from './dto/create-hobby.dto';
 import { UpdateHobbyDto } from './dto/update-hobby.dto';
 import { JwtAuthGuard } from 'src/auth/jwt.auth.guard';
 
@@ -19,10 +18,9 @@ export class HobbyController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createHobbyDto: CreateHobbyDto, personId: number) {
-    return this.hobbyService.create(personId, createHobbyDto);
+  create(@Body() body: { personId: number; name: string }) {
+    return this.hobbyService.create(body.personId, { name: body.name });
   }
-
   @Get()
   findAll() {
     return this.hobbyService.findAll();

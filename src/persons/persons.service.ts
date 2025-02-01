@@ -8,12 +8,17 @@ export class PersonsService {
   constructor(private prisma: PrismaService) {}
 
   async createPerson(createPersonDto: CreatePersonDto, imageUrl?: string) {
-    return this.prisma.person.create({
-      data: {
-        ...createPersonDto,
-        picture: imageUrl,
-      },
-    });
+    try {
+      return this.prisma.person.create({
+        data: {
+          ...createPersonDto,
+          picture: imageUrl,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 
   async findAll() {

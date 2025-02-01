@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateFavoriteCharacterDto } from './dto/create-favorite-character.dto';
 import { UpdateFavoriteCharacterDto } from './dto/update-favorite-character.dto';
 import { PrismaService } from 'src/prisma.service';
 
@@ -7,10 +6,7 @@ import { PrismaService } from 'src/prisma.service';
 export class FavoriteCharacterService {
   constructor(private prisma: PrismaService) {}
 
-  async create(
-    personId: number,
-    createFavoriteCharacterDto: CreateFavoriteCharacterDto,
-  ) {
+  async create(personId: number, name: string, origin: string) {
     const person = await this.prisma.person.findUnique({
       where: { id: personId },
     });
@@ -18,7 +14,8 @@ export class FavoriteCharacterService {
 
     return this.prisma.favoriteCharacter.create({
       data: {
-        ...createFavoriteCharacterDto,
+        name,
+        origin,
         person: { connect: { id: person.id } },
       },
     });

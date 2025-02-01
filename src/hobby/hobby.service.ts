@@ -8,10 +8,14 @@ export class HobbyService {
   constructor(private prisma: PrismaService) {}
 
   async create(personId: number, createHobbyDto: CreateHobbyDto) {
+    if (!personId || isNaN(personId)) {
+      throw new Error('Invalid personId: Must be a valid number');
+    }
+
     return this.prisma.hobby.create({
       data: {
-        ...createHobbyDto,
-        person: { connect: { id: personId } },
+        name: createHobbyDto.name,
+        person: { connect: { id: personId } }, // Perbaikan koneksi
       },
     });
   }
