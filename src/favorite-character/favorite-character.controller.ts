@@ -12,6 +12,7 @@ import {
 import { FavoriteCharacterService } from './favorite-character.service';
 import { UpdateFavoriteCharacterDto } from './dto/update-favorite-character.dto';
 import { JwtAuthGuard } from 'src/auth/jwt.auth.guard';
+import { CreateFavoriteCharactersDto } from './dto/create-favorite-character.dto';
 
 @Controller('api/v1/favorite-characters')
 export class FavoriteCharacterController {
@@ -21,18 +22,13 @@ export class FavoriteCharacterController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(
-    @Body()
-    body: {
-      personId: number;
-      name: string;
-      origin: string;
-    },
-  ) {
-    return this.favoriteCharacterService.create(
-      body.personId,
-      body.name,
-      body.origin,
+  async create(@Body() body: CreateFavoriteCharactersDto) {
+    const { personId, favorite_characters } = body;
+
+    // Panggil service untuk menyimpan semua karakter favorit
+    return this.favoriteCharacterService.createMany(
+      personId,
+      favorite_characters,
     );
   }
 

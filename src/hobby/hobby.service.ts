@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateHobbyDto } from './dto/create-hobby.dto';
 import { UpdateHobbyDto } from './dto/update-hobby.dto';
 import { PrismaService } from 'src/prisma.service';
 
@@ -7,16 +6,22 @@ import { PrismaService } from 'src/prisma.service';
 export class HobbyService {
   constructor(private prisma: PrismaService) {}
 
-  async create(personId: number, createHobbyDto: CreateHobbyDto) {
-    if (!personId || isNaN(personId)) {
-      throw new Error('Invalid personId: Must be a valid number');
+  async create(createHobbyDtos: { name: string; personId: number }[]) {
+    // Memastikan setiap personId valid
+    for (const hobby of createHobbyDtos) {
+      if (!hobby.personId || isNaN(hobby.personId)) {
+        throw new Error('Invalid personId: Must be a valid number');
+      }
     }
 
-    return this.prisma.hobby.create({
-      data: {
-        name: createHobbyDto.name,
-        person: { connect: { id: personId } }, // Perbaikan koneksi
-      },
+    // Menyusun data untuk batch create
+    const hobbies = createHobbyDtos.map((dto) => ({
+      name: dto.name,
+      personId: dto.personId,
+    }));
+
+    return this.prisma.hobby.createMany({
+      data: hobbies,
     });
   }
 

@@ -11,6 +11,7 @@ import {
 import { HobbyService } from './hobby.service';
 import { UpdateHobbyDto } from './dto/update-hobby.dto';
 import { JwtAuthGuard } from 'src/auth/jwt.auth.guard';
+import { CreateHobbyDto } from './dto/create-hobby.dto';
 
 @Controller('api/v1/hobbies')
 export class HobbyController {
@@ -18,9 +19,14 @@ export class HobbyController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() body: { personId: number; name: string }) {
-    return this.hobbyService.create(body.personId, { name: body.name });
+  async create(@Body() body: CreateHobbyDto) {
+    const { personId, hobbies } = body;
+
+    const createHobbyDtos = hobbies.map((name) => ({ name, personId }));
+
+    return this.hobbyService.create(createHobbyDtos);
   }
+
   @Get()
   findAll() {
     return this.hobbyService.findAll();

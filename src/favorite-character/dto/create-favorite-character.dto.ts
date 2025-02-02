@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateFavoriteCharacterDto {
   @IsNotEmpty()
@@ -8,4 +9,14 @@ export class CreateFavoriteCharacterDto {
   @IsNotEmpty()
   @IsString()
   name: string;
+}
+
+export class CreateFavoriteCharactersDto {
+  @IsNotEmpty()
+  personId: number;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateFavoriteCharacterDto)
+  favorite_characters: CreateFavoriteCharacterDto[];
 }

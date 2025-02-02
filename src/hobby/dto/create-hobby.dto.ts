@@ -1,7 +1,11 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNumber, IsArray, IsString, ArrayNotEmpty } from 'class-validator';
 
 export class CreateHobbyDto {
-  @IsString()
-  @IsNotEmpty()
-  name: string;
+  @IsNumber()
+  personId: number;
+
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsString({ each: true })
+  hobbies: string[];
 }
